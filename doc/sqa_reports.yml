@@ -1,0 +1,6 @@
+Applications:
+    ris:
+        app_types:
+            - RISApp
+        content_directory: ${ROOT_DIR}/doc/content
+        log_default: WARNING
