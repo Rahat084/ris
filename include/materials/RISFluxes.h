@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Material.h"
-#include "LinearInterpolation.h"
 
 class RISFluxes : public Material
 {
@@ -21,18 +20,34 @@ public:
 
 protected:
   virtual void computeQpProperties() override;
+  void computeOnsagerCoefQp();
 
 private:
-  /// member variable to hold the computed diffusivity coefficient
-  MaterialProperty<Real> & _diffusivity;
-  /// member variable to hold the computed convection velocity gradient term
-  MaterialProperty<RealGradient> & _convection_velocity;
 
-  /// A place to store the coupled variable gradient for calculating the convection velocity
-  /// property.
-  const VariableGradient & _diffusion_gradient;
-
-  /// A helper object for performaing linear interpolations on tabulated data for calculating the
-  /// diffusivity property.
-  LinearInterpolation _piecewise_func;
+  /// Coupled Variables
+  const VariableValue & _C_I;
+  const VariableValue & _C_V;
+  const VariableValue & _C_Fe;
+  const VariableValue & _C_Cr;
+  const VariableValue & _C_Ni;
+  const VariableValue & _C_Si;
+    // Chemical Potential for Solutes of Defects
+  const Real _mu_Fe;
+  const Real _mu_Cr;
+  const Real _mu_Ni;
+  const Real _mu_Si;
+  const Real _mu_V;
+  const Real _mu_I;
+    // Diffusion Flux of defects
+  ADMaterialProperty<Real> & _J_Fe_V;
+  ADMaterialProperty<Real> & _J_Fe_I;
+  ADMaterialProperty<Real> & _J_Cr_V;
+  ADMaterialProperty<Real> & _J_Cr_I;
+  ADMaterialProperty<Real> & _J_Ni_V;
+  ADMaterialProperty<Real> & _J_Ni_I;
+  ADMaterialProperty<Real> & _J_Si_V;
+  ADMaterialProperty<Real> & _J_Si_I;
+  //Onsager Coefficients
+  DenseMatrix<Real> _L_V;
+  DenseMatrix<Real> _L_I;
 };
