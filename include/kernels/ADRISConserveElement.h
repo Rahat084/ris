@@ -11,21 +11,21 @@
 
 #include "ADKernelGrad.h"
 
-class ADRISConserveSolute : public ADKernelGrad
+class ADRISConserveElement : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
 
-  ADRISConserveSolute(const InputParameters & parameters);
+  ADRISConserveElement(const InputParameters & parameters);
   
-  // Solute Name
-  std::string _solute_name;
+  // Element Name
+  std::string _element_name;
  
   // Interstitial Fluxes
-  const ADMaterialProperty<Real>& _J_I;
+  const ADMaterialProperty<std::vector<Real>>& _J_I;
   
  // Vacancy Fluxes
-  const ADMaterialProperty<Real>& _J_V;
+  const ADMaterialProperty<std::vector<Real>>& _J_V;
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

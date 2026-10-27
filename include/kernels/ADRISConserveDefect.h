@@ -18,20 +18,25 @@ public:
 
   ADRISConserveDefect(const InputParameters & parameters);
   
-  // Solute Name
+  // Defect type 
   std::string _defect_type;
+  // Element names
+  const std::vector<std::string> _element_names;
  
+   std::vector <const ADMaterialProperty<std::vector<Real>>*> _element_defect_fluxes;
+  /*
   // Fe based defect Fluxes
-  const ADMaterialProperty<Real>& _J_Fe;
+  const ADMaterialProperty<std::vector<Real>>& _J_Fe;
   
  // Cr based defect Fluxes
-  const ADMaterialProperty<Real>& _J_Cr;
+  const ADMaterialProperty<std::vector<Real>>& _J_Cr;
 
  // Ni based defect Fluxes
-  const ADMaterialProperty<Real>& _J_Ni;
+  const ADMaterialProperty<std::vector<Real>>& _J_Ni;
 
  // Cr based defect Fluxes
-  const ADMaterialProperty<Real>& _J_Si;
+  const ADMaterialProperty<std::vector<Real>>& _J_Si;
+  */
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

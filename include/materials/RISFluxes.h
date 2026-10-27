@@ -24,30 +24,24 @@ protected:
 
 private:
 
+  /// element names and diffusion coefficients
+  const std::vector<std::string> _element_names;
+  std::vector<Real> _element_int_diffCoef;
+  std::vector<Real> _element_vac_diffCoef;
   /// Coupled Variables
   const VariableValue & _C_I;
-  const VariableValue & _C_V;
-  const VariableValue & _C_Fe;
-  const VariableValue & _C_Cr;
-  const VariableValue & _C_Ni;
-  const VariableValue & _C_Si;
-    // Chemical Potential for Solutes of Defects
-  const Real _mu_Fe;
-  const Real _mu_Cr;
-  const Real _mu_Ni;
-  const Real _mu_Si;
-  const Real _mu_V;
-  const Real _mu_I;
-    // Diffusion Flux of defects
-  ADMaterialProperty<Real> & _J_Fe_V;
-  ADMaterialProperty<Real> & _J_Fe_I;
-  ADMaterialProperty<Real> & _J_Cr_V;
-  ADMaterialProperty<Real> & _J_Cr_I;
-  ADMaterialProperty<Real> & _J_Ni_V;
-  ADMaterialProperty<Real> & _J_Ni_I;
-  ADMaterialProperty<Real> & _J_Si_V;
-  ADMaterialProperty<Real> & _J_Si_I;
+  const VariableValue  & _C_V;
+  std::vector<const VariableValue *>   _C_elements;
+  // chemical potentials
+  const VariableGradient & _grad_C_I;
+  const VariableGradient & _grad_C_V;
+  std::vector<const VariableGradient *>  _grad_C_elements;
   //Onsager Coefficients
+  const Real _f0_V;
+  const Real _f0_I;
   DenseMatrix<Real> _L_V;
   DenseMatrix<Real> _L_I;
+  // Diffusion Flux of defects
+   std::vector <ADMaterialProperty<std::vector<Real>>*> _element_int_fluxes;
+   std::vector <ADMaterialProperty<std::vector<Real>>*> _element_vac_fluxes;
 };

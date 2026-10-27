@@ -18,87 +18,110 @@ RISFluxes::validParams()
 
   // Allow users to specify vectors defining the points of a piecewise function formed via linear
   // interpolation.
+  params.addRequiredParam<std::vector<std::string>>(
+      "element_names",
+      {},
+      "Name of the elements");
   params.addRequiredParam<std::vector<Real>>(
-      "independent_vals",
-      "The vector of z-coordinate values for a piecewise function's independent variable");
+      "elements_int_diffCoef", {}, "Interstitial Diffusion Coefficient of the elements");
   params.addRequiredParam<std::vector<Real>>(
-      "dependent_vals", "The vector of diffusivity values for a piecewise function's dependent");
-
-  // Allow the user to specify which independent variable's gradient to use for calculating the
-  // convection velocity property:
-  /*
-  params.addCoupledVar(
-      "diffusion_gradient",
-      "The gradient of this variable will be used to compute a velocity vector property.");
-*/
-  params.addCoupledVar(
+      "elements_vac_diffCoef", {}, "Vacancy Diffusion Coefficient of the elements");
+  params.addRequiredCoupledVar(
       "vacancy_concentration",
       "Concentration of the vacancy defect due to irradiation");
-  params.addCoupledVar(
+  params.addRequiredCoupledVar(
       "interstitial_concentration",
       "Concentration of the vacancy defect due to irradiation");
-  params.addCoupledVar(
-      "Fe_concentration",
-      "Concentration of the Fe atoms due to irradiation");
-  params.addCoupledVar(
-      "Cr_concentration",
-      "Concentration of the Cr atoms due to irradiation");
-  params.addCoupledVar(
-      "Ni_concentration",
-      "Concentration of the Ni atoms due to irradiation");
-  params.addCoupledVar(
-      "Si_concentration",
-      "Concentration of the Si atoms due to irradiation");
-  params.addRequiredParam<Real>( "mu_Fe", 1.0, "Chemical potential of Fe");
-  params.addRequiredParam<Real>( "mu_Cr", 1.0, "Chemical potential of Cr");
-  params.addRequiredParam<Real>( "mu_Ni", 1.0, "Chemical potential of Ni");
-  params.addRequiredParam<Real>( "mu_Si", 1.0, "Chemical potential of Si");
+  params.addRequiredCoupledVar(
+      "element_concentration",
+      "Concentration of the elements of the alloy");
+  /*
+  params.addRequiredParam<std::vector<std::string>>( "coupledvar_element_names", {}, "name of the coupled variables of the elements");
   params.addRequiredParam<Real>( "mu_V", 1.0, "Chemical potential of vacancy");
   params.addRequiredParam<Real>( "mu_I", 1.0, "Chemical potential of interstitial");
+  params.addRequiredParam<std::vector<Real>>( "mu_elements", {}, "Chemical potential of elements");
+  */
+  params.addRequiredParam<Real>( "corr_factor_vac", 1.0, "Correlation factor of vacancies");
+  params.addRequiredParam<Real>( "corr_factor_int", 1.0, "Correlation factor of interstitials");
   return params;
 }
 
 RISFluxes::RISFluxes(const InputParameters & parameters)
   : Material(parameters),
-    // Declare that this material is going to provide a Real value typed
-    // material property named "diffusivity" that Kernels and other objects can use.
-    // This property is "bound" to the class's "_diffusivity" member.
+    _element_names(getParam<std::vector<std::string>>("element_names")),
+    _element_int_diffCoef(getParam<std::vector<Real>>("element_int_diffCoef")),
+    _element_vac_diffCoef(getParam<std::vector<Real>>("element_vac_diffCoef")),
     // Coupled Variables 
     _C_I(coupledValue("interstitial_concentration")),
     _C_V(coupledValue("vacancy_concentration")),
-    _C_Fe(coupledValue("Fe_concentration")),
-    _C_Cr(coupledValue("Cr_concentration")),
-    _C_Ni(coupledValue("Ni_concentration")),
-    _C_Si(coupledValue("Si_concentration")),
+    _C_elements(coupledValues("element_concentration")),
     // Chemical Potential for Solutes of Defects
-    _mu_Fe(getParam<Real>("mu_Fe")),
-    _mu_Cr(getParam<Real>("mu_Cr")),
-    _mu_Ni(getParam<Real>("mu_Ni")),
-    _mu_Si(getParam<Real>("mu_Si")),
-    _mu_V(getParam<Real>("mu_V")),
-    _mu_I(getParam<Real>("mu_I")),
+    _grad_C_I(coupledGradient("interstitial_concentration")),
+    _grad_C_V(coupledGradient("vacancy_concentration")),
+    _grad_C_elements(coupledGradients("element_concentration")),
     // Diffusion Flux of defects
-    _J_Fe_V(declareADProperty<Real>("Fe_vacancy")),
-    _J_Fe_I(declareADProperty<Real>("Fe_interstitial")),
-    _J_Cr_V(declareADProperty<Real>("Cr_vacancy")),
-    _J_Cr_I(declareADProperty<Real>("Cr_interstital")),
-    _J_Ni_V(declareADProperty<Real>("Ni_vacancy")),
-    _J_Ni_I(declareADProperty<Real>("Ni_interstital")),
-    _J_Si_V(declareADProperty<Real>("Si_vacancy")),
-    _J_Si_I(declareADProperty<Real>("Si_interstital")),
     // Onsager Coefficients
-    _L_V(4,4),
-    _L_I(4,4)
+    _f0_V(getParam<Real>("corr_factor_vac")),
+    _f0_I(getParam<Real>("corr_factor_int")),
+    _L_V(_element_names.size(),_element_names.size()),
+    _L_I(_element_names.size(),_element_names.size())
 {
+      for (const auto & name : _element_names)
+      {
+    _element_int_fluxes.push_back(&declareADProperty<std::vector<Real>>(name + "_interstitial"));
+    _element_vac_fluxes.push_back(&declareADProperty<std::vector<Real>>(name + "_vacancy"));
+      }
+      /*
+      _C_elements.resize(_element_names.size());
+      _grad_C_elements.resize(_element_names.size());
+      for (unsigned int i = 0; i < _element_names.size(); ++i)
+
+      {_C_elements[i] = &CoupledValue("element_concentration", i);
+	_grad_C_elements[i] = &CoupledGradient("element_concentration", i);
+      }
+      */
 }
 
 void
 RISFluxes::computeOnsagerCoefQp()
 {
+    Real CmDm_V = 0; 
+    Real CmDm_I = 0;
+
+    for (unsigned int i=0; i <_element_names.size(); ++i)
+    { 
+	CmDm_V += (*_C_elements[i])[_qp] * _element_vac_diffCoef[i];
+	CmDm_I += (*_C_elements[i])[_qp] * _element_int_diffCoef[i];
+    }
+
+    for (unsigned int i=0; i<_element_names.size(); ++i)
+	{
+	    _L_V(i,i) =  ((*_C_elements[i])[_qp] * _element_vac_diffCoef[i] * _C_V[_qp]) * (1 + (1 -_f0_V)/(_f0_V) * ((*_C_elements[i])[_qp] * _element_vac_diffCoef[i])/CmDm_V); 
+
+	    _L_I(i,i) =  ((*_C_elements[i])[_qp] * _element_int_diffCoef[i] * _C_I[_qp]) * (1 + (1 -_f0_I)/(_f0_I) * ( (*_C_elements[i])[_qp] * _element_int_diffCoef[i])/CmDm_I); 
+// Explicit symmetric implementation of off diagonal terms
+    for ( unsigned int j=0; j < i; ++j)
+    {
+	    _L_V(i,j) =  (1 -_f0_V)/(_f0_V) * ((*_C_elements[i])[_qp] * _element_vac_diffCoef[i] * (*_C_elements[j])[_qp] * _element_vac_diffCoef[j] *  _C_V[_qp])/(CmDm_V) ; 
+
+	    _L_I(i,j) =  (1 -_f0_I)/(_f0_I) * ((*_C_elements[i])[_qp] * _element_int_diffCoef[i] * (*_C_elements[j])[_qp] * _element_int_diffCoef[j] *  _C_I[_qp])/( CmDm_I) ; 
+
+	    _L_V(j, i) = _L_V(i, j);
+	    _L_I(j, i) = _L_I(i, j);
+	}
+    }
+
 }
 void
 RISFluxes::computeQpProperties()
 {
     computeOnsagerCoefQp();
+    for (unsigned int i = 0; i < _element_names.size(); ++i)
+	for (unsigned  j = 0; j < _element_names.size(); ++j)
+	    for (unsigned  k = 0; k < LIBMESH_DIM; ++k)
+	{
+    (*_element_vac_fluxes[i])[_qp][k] += _L_V(i, j) * ((*_grad_C_elements[j])[_qp](k) / (*_C_elements[j])[_qp] - _grad_C_V[_qp](k) / _C_V[_qp] ) ; 
+    (*_element_int_fluxes[i])[_qp][k] += _L_V(i, j) * ((*_grad_C_elements[j])[_qp](k) / (*_C_elements[j])[_qp] + _grad_C_I[_qp](k) / _C_I[_qp] ) ; 
+	}
 
 }
