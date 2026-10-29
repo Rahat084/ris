@@ -29,13 +29,13 @@ private:
   std::vector<Real> _element_int_diffCoef;
   std::vector<Real> _element_vac_diffCoef;
   /// Coupled Variables
-  const VariableValue & _C_I;
-  const VariableValue  & _C_V;
-  std::vector<const VariableValue *>   _C_elements;
+  const ADVariableValue & _C_I;
+  const ADVariableValue  & _C_V;
+  std::vector<const ADVariableValue *>   _C_elements;
   // chemical potentials
-  const VariableGradient & _grad_C_I;
-  const VariableGradient & _grad_C_V;
-  std::vector<const VariableGradient *>  _grad_C_elements;
+  const ADVariableGradient & _grad_C_I;
+  const ADVariableGradient & _grad_C_V;
+  std::vector<const ADVariableGradient *>  _grad_C_elements;
   //Onsager Coefficients
   const Real _f0_V;
   const Real _f0_I;

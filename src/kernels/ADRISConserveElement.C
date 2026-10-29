@@ -9,7 +9,7 @@
 
 #include "ADRISConserveElement.h"
 
-registerMooseObject("MooseApp", ADRISConserveElement);
+registerMooseObject("RISApp", ADRISConserveElement);
 
 InputParameters
 ADRISConserveElement::validParams()
@@ -17,14 +17,14 @@ ADRISConserveElement::validParams()
   auto params = ADKernelGrad::validParams();
   params.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
                              "is computed using forward automatic differentiation");
-  params.addRequiredParam<std::string>( "element_name", "Fe", "The entity with conserved diffusion flux");
+  params.addRequiredParam<std::string>( "element_name", "The entity with conserved diffusion flux");
   return params;
 }
 
 ADRISConserveElement::ADRISConserveElement(const InputParameters & parameters) : ADKernelGrad(parameters),
     _element_name(getParam<std::string>("element_name")),
-    _J_I(getADMaterialProperty<std::vector<Real>>(_element_name + "_interstitial")),
-    _J_V(getADMaterialProperty<std::vector<Real>>(_element_name + "_vacancy"))
+    _J_I(getADMaterialProperty<std::vector<Real>>(_element_name + "_interstitial_flux")),
+    _J_V(getADMaterialProperty<std::vector<Real>>(_element_name + "_vacancy_flux"))
 {
 }
 

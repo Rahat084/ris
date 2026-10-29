@@ -9,7 +9,7 @@
 
 #include "ADRISConserveDefect.h"
 
-registerMooseObject("MooseApp", ADRISConserveDefect);
+registerMooseObject("RISApp", ADRISConserveDefect);
 
 InputParameters
 ADRISConserveDefect::validParams()
@@ -17,10 +17,9 @@ ADRISConserveDefect::validParams()
   auto params = ADKernelGrad::validParams();
   params.addClassDescription("Same as `Diffusion` in terms of physics/residual, but the Jacobian "
                              "is computed using forward automatic differentiation");
-  params.addRequiredParam<std::string>( "defect_type", "vacancy", "The defect with conserved diffusion flux");
+  params.addRequiredParam<std::string>( "defect_type", "The defect with conserved diffusion flux");
   params.addRequiredParam<std::vector<std::string>>(
       "element_names",
-      {},
       "Name of the elements");
   return params;
 }
@@ -36,7 +35,7 @@ ADRISConserveDefect::ADRISConserveDefect(const InputParameters & parameters) : A
     */
 {
   for (const auto & name : _element_names)
-    _element_defect_fluxes.push_back(&getADMaterialProperty<std::vector<Real>>(name + _defect_type));
+    _element_defect_fluxes.push_back(&getADMaterialProperty<std::vector<Real>>(name + "_" + _defect_type + "_flux"));
 }
 
 ADRealVectorValue

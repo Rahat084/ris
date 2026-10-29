@@ -9,7 +9,7 @@
 
 #include "ADDefectFluxBC.h"
 
-registerMooseObject("MooseApp", ADDefectFluxBC);
+registerMooseObject("RISApp", ADDefectFluxBC);
 
 InputParameters
 ADDefectFluxBC::validParams()
@@ -21,7 +21,6 @@ ADDefectFluxBC::validParams()
       "defect_type",  "Type of defect for which the boundary condition is set ");
   params.addRequiredParam<std::vector<std::string>>(
       "element_names",
-      {},
       "Name of the elements");
   return params;
 }
@@ -32,7 +31,7 @@ ADDefectFluxBC::ADDefectFluxBC(const InputParameters & parameters)
     _element_names(getParam<std::vector<std::string>>("element_names"))
 {
   for (const auto & name : _element_names)
-    _element_defect_fluxes.push_back(&getADMaterialProperty<std::vector<Real>>(name + _defect_type));
+    _element_defect_fluxes.push_back(&getADMaterialProperty<std::vector<Real>>(name + "_" + _defect_type + "_flux"));
 }
 
 ADReal
