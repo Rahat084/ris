@@ -23,17 +23,14 @@ ADRISConserveElement::validParams()
 
 ADRISConserveElement::ADRISConserveElement(const InputParameters & parameters) : ADKernelGrad(parameters),
     _element_name(getParam<std::string>("element_name")),
-    _J_I(getADMaterialProperty<std::vector<Real>>(_element_name + "_interstitial_flux")),
-    _J_V(getADMaterialProperty<std::vector<Real>>(_element_name + "_vacancy_flux"))
+    _J_I(getADMaterialProperty<RealVectorValue>(_element_name + "_interstitial_flux")),
+    _J_V(getADMaterialProperty<RealVectorValue>(_element_name + "_vacancy_flux"))
 {
 }
 
 ADRealVectorValue
 ADRISConserveElement::precomputeQpResidual()
 {
-   MaterialProperty<ADRealVectorValue> J_element;
-   for (const auto i : make_range(LIBMESH_DIM))
-	   J_element[_qp](i) = _J_I[_qp][i] + _J_V[_qp][i];
   //return _grad_u[_qp];
-  return J_element[_qp];
+  return _J_I[_qp] + _J_V[_qp];
 }

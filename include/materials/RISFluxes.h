@@ -29,19 +29,19 @@ private:
   std::vector<Real> _element_int_diffCoef;
   std::vector<Real> _element_vac_diffCoef;
   /// Coupled Variables
-  const ADVariableValue & _C_I;
-  const ADVariableValue  & _C_V;
-  std::vector<const ADVariableValue *>   _C_elements;
+  const VariableValue & _C_I;
+  const VariableValue  & _C_V;
+  std::vector<const VariableValue *>   _C_elements;
   // chemical potentials
-  const ADVariableGradient & _grad_C_I;
-  const ADVariableGradient & _grad_C_V;
-  std::vector<const ADVariableGradient *>  _grad_C_elements;
+  const VariableGradient & _grad_C_I;
+  const VariableGradient & _grad_C_V;
+  std::vector<const VariableGradient *>  _grad_C_elements;
   //Onsager Coefficients
   const Real _f0_V;
   const Real _f0_I;
   DenseMatrix<Real> _L_V;
   DenseMatrix<Real> _L_I;
   // Diffusion Flux of defects
-   std::vector <ADMaterialProperty<std::vector<Real>>*> _element_int_fluxes;
-   std::vector <ADMaterialProperty<std::vector<Real>>*> _element_vac_fluxes;
+   std::vector<ADMaterialProperty<RealVectorValue>*> _element_int_fluxes;
+   std::vector<ADMaterialProperty<RealVectorValue>*> _element_vac_fluxes;
 };

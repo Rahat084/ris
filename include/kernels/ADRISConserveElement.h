@@ -22,10 +22,10 @@ public:
   std::string _element_name;
  
   // Interstitial Fluxes
-  const ADMaterialProperty<std::vector<Real>>& _J_I;
+  const ADMaterialProperty<RealVectorValue> & _J_I;
   
  // Vacancy Fluxes
-  const ADMaterialProperty<std::vector<Real>>& _J_V;
+  const ADMaterialProperty<RealVectorValue> & _J_V;
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

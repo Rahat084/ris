@@ -26,5 +26,5 @@ protected:
   // Element names
   const std::vector<std::string> _element_names;
   // Defect flux
-   std::vector <const ADMaterialProperty<std::vector<Real>>*> _element_defect_fluxes;
+   std::vector <const ADMaterialProperty<RealVectorValue>*> _element_defect_fluxes;
 };

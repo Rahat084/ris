@@ -35,16 +35,15 @@ ADRISConserveDefect::ADRISConserveDefect(const InputParameters & parameters) : A
     */
 {
   for (const auto & name : _element_names)
-    _element_defect_fluxes.push_back(&getADMaterialProperty<std::vector<Real>>(name + "_" + _defect_type + "_flux"));
+    _element_defect_fluxes.push_back(&getADMaterialProperty<RealVectorValue>(name + "_" + _defect_type + "_flux"));
 }
 
 ADRealVectorValue
 ADRISConserveDefect::precomputeQpResidual()
 {
-MaterialProperty<ADRealVectorValue> J_Defect;
-for (unsigned int i = 0; _element_names.size(); ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-	J_Defect[_qp](j) += (*_element_defect_fluxes[i])[_qp][j]; 
+ADRealVectorValue J_Defect = 0.0;
+for (unsigned int i = 0; i < _element_names.size(); ++i)
+	J_Defect += (*_element_defect_fluxes[i])[_qp]; 
   //return _grad_u[_qp];
-  return J_Defect[_qp];
+  return J_Defect;
 }
