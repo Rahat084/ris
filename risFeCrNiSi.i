@@ -1,17 +1,17 @@
 # Global Values
-R = 1.0 # Recombination Rate
-eps = 0.5 # Damage factor
+K0 =  7E-6 # Radiation Dose rate 
+eps = 20.0 # Damage Efficiency
 [Mesh]
   [rectangle]
     type = GeneratedMeshGenerator
-    dim = 2
-    nx = 40
-    ny = 80
+    dim = 1
+    nx = 1000
+    #ny = 80
     #elem_type = Quad
-    xmax = 7E-2
+    xmax = 7E-5
     xmin = 0
-    ymax = 1E-3
-    ymin = 0 
+    #ymax = 1E-6
+    #ymin = 0 
   []
 []
 
@@ -106,26 +106,26 @@ eps = 0.5 # Damage factor
     element_name = 'Si'
   []
   [Vac_recomb]
-    type = ADCoupledForce
+    type = ADRecombination
     variable = C_Vac
-    v = C_Int
-    coef = ${fparse R}
+    recombination_rate = 0.5
+    defect_conjugate = C_Int
   []
   [Int_recomb]
-    type = ADCoupledForce
+    type = ADRecombination
     variable = C_Int
-    v = C_Vac
-    coef = ${fparse R}
+    recombination_rate = 0.5
+    defect_conjugate = C_Vac
   []
   [Vac_source]
     type = ADBodyForce
     variable = C_Vac
-    value = ${fparse eps}
+    value = ${fparse K0 * eps / 100 }
   []
   [Int_source]
     type = ADBodyForce
     variable = C_Int
-    value = ${fparse eps}
+    value = ${fparse K0 * eps / 100 }
   []
 []
 
@@ -135,14 +135,14 @@ eps = 0.5 # Damage factor
     variable = C_Vac
     defect_type = 'vacancy'
     element_names = 'Fe Cr Ni Si'
-    boundary = 'left'
+    boundary = 'right'
   []
   [Int_fluxes]
     type = ADDefectFluxBC
     variable = C_Int
     defect_type = 'interstitial'
     element_names = 'Fe Cr Ni Si'
-    boundary = 'left'
+    boundary = 'right'
   []
 []
 
@@ -150,13 +150,13 @@ eps = 0.5 # Damage factor
   [radiation_fluxes]
     type = RISFluxes
     element_names = 'Fe Cr Ni Si'
-    element_int_diffCoef = '1E-2 1E-2 1E-3 1E-1'
-    element_vac_diffCoef = '1E-2 1E-2 1E-3 1E-1'
+    element_int_diffCoef = '2E5 2E5 2E5 4.3E5'
+    element_vac_diffCoef = '1.5E5 1.75E5 1.3E5 1.7E5'
     vacancy_concentration = C_Vac
     interstitial_concentration = C_Int
     element_concentration = 'C_Fe C_Cr C_Ni C_Si'
-    corr_factor_vac = 1.0
-    corr_factor_int = 1.0
+    corr_factor_vac = 0.78
+    corr_factor_int = 0.44
   []
 []
 
@@ -165,7 +165,8 @@ eps = 0.5 # Damage factor
   solve_type = NEWTON
   start_time = 0.0
   end_time = 1.0
-  dt = 0.025
+  dt = 1E-2
+  dtmin = 1E-25
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
 []

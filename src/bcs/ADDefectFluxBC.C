@@ -30,6 +30,8 @@ ADDefectFluxBC::ADDefectFluxBC(const InputParameters & parameters)
     _defect_type(getParam<std::string>("defect_type")),
     _element_names(getParam<std::vector<std::string>>("element_names"))
 {
+   if (_defect_type != "vacancy" && _defect_type != "interstitial")
+       mooseError(" The parameters defect type must be either vacancy or interstitial");
   for (const auto & name : _element_names)
     _element_defect_fluxes.push_back(&getADMaterialProperty<RealVectorValue>(name + "_" + _defect_type + "_flux"));
 }
@@ -39,6 +41,9 @@ ADDefectFluxBC::computeQpResidual()
 {
 ADRealVectorValue J_Defect = 0.0;
 for (unsigned int i = 0; i < _element_names.size(); ++i)
+    if (_defect_type == "vacancy")
+	J_Defect -= (*_element_defect_fluxes[i])[_qp]; 
+    else
 	J_Defect += (*_element_defect_fluxes[i])[_qp]; 
 
   return  J_Defect * _normals[_qp] * _test[_i][_qp] ;

@@ -34,6 +34,8 @@ ADRISConserveDefect::ADRISConserveDefect(const InputParameters & parameters) : A
     _J_Si(getADMaterialProperty<std::vector<Real>>("Si_" + _defect_type))
     */
 {
+   if (_defect_type != "vacancy" && _defect_type != "interstitial")
+       mooseError(" The parameters defect type must be either vacancy or interstitial");
   for (const auto & name : _element_names)
     _element_defect_fluxes.push_back(&getADMaterialProperty<RealVectorValue>(name + "_" + _defect_type + "_flux"));
 }
@@ -43,7 +45,10 @@ ADRISConserveDefect::precomputeQpResidual()
 {
 ADRealVectorValue J_Defect = 0.0;
 for (unsigned int i = 0; i < _element_names.size(); ++i)
+    if (_defect_type == "vacancy")
+	J_Defect -= (*_element_defect_fluxes[i])[_qp]; 
+    else
 	J_Defect += (*_element_defect_fluxes[i])[_qp]; 
   //return _grad_u[_qp];
-  return J_Defect;
+  return  - J_Defect;
 }

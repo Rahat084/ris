@@ -32,5 +32,5 @@ ADRealVectorValue
 ADRISConserveElement::precomputeQpResidual()
 {
   //return _grad_u[_qp];
-  return _J_I[_qp] + _J_V[_qp];
+  return  -_J_I[_qp] - _J_V[_qp];
 }

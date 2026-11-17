@@ -123,8 +123,8 @@ RISFluxes::computeQpProperties()
 	for (unsigned  j = 0; j < _element_names.size(); ++j)
 //	    for (unsigned  k = 0; k < LIBMESH_DIM; ++k)
 	{
-    (*_element_vac_fluxes[i])[_qp] += _L_V(i, j) * ((*_grad_C_elements[j])[_qp] / (*_C_elements[j])[_qp] - _grad_C_V[_qp] / _C_V[_qp] ) ; 
-    (*_element_int_fluxes[i])[_qp] += _L_V(i, j) * ((*_grad_C_elements[j])[_qp] / (*_C_elements[j])[_qp] + _grad_C_I[_qp] / _C_I[_qp] ) ; 
+    (*_element_vac_fluxes[i])[_qp] -= _L_V(i, j) * ((*_grad_C_elements[j])[_qp] / (*_C_elements[j])[_qp] - _grad_C_V[_qp] / _C_V[_qp] ) ; 
+    (*_element_int_fluxes[i])[_qp] -= _L_I(i, j) * ((*_grad_C_elements[j])[_qp] / (*_C_elements[j])[_qp] + _grad_C_I[_qp] / _C_I[_qp] ) ; 
 	}
     }
 
