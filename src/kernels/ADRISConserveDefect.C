@@ -46,6 +46,7 @@ ADRISConserveDefect::precomputeQpResidual()
 ADRealVectorValue J_Defect = 0.0;
 for (unsigned int i = 0; i < _element_names.size(); ++i)
     if (_defect_type == "vacancy")
+	// Vacancies move opposite to the elements
 	J_Defect -= (*_element_defect_fluxes[i])[_qp]; 
     else
 	J_Defect += (*_element_defect_fluxes[i])[_qp]; 

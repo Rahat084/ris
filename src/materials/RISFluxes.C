@@ -51,13 +51,13 @@ RISFluxes::RISFluxes(const InputParameters & parameters)
     _element_int_diffCoef(getParam<std::vector<Real>>("element_int_diffCoef")),
     _element_vac_diffCoef(getParam<std::vector<Real>>("element_vac_diffCoef")),
     // Coupled Variables 
-    _C_I(coupledValue("interstitial_concentration")),
-    _C_V(coupledValue("vacancy_concentration")),
-    _C_elements(coupledValues("element_concentration")),
+    _C_I(adCoupledValue("interstitial_concentration")),
+    _C_V(adCoupledValue("vacancy_concentration")),
+    _C_elements(adCoupledValues("element_concentration")),
     // Chemical Potential for Solutes of Defects
-    _grad_C_I(coupledGradient("interstitial_concentration")),
-    _grad_C_V(coupledGradient("vacancy_concentration")),
-    _grad_C_elements(coupledGradients("element_concentration")),
+    _grad_C_I(adCoupledGradient("interstitial_concentration")),
+    _grad_C_V(adCoupledGradient("vacancy_concentration")),
+    _grad_C_elements(adCoupledGradients("element_concentration")),
     // Diffusion Flux of defects
     // Onsager Coefficients
     _f0_V(getParam<Real>("corr_factor_vac")),
@@ -84,8 +84,8 @@ RISFluxes::RISFluxes(const InputParameters & parameters)
 void
 RISFluxes::computeOnsagerCoefQp()
 {
-    Real CmDm_V = 0; 
-    Real CmDm_I = 0;
+    ADReal CmDm_V = 0; 
+    ADReal CmDm_I = 0;
 
     for (unsigned int i=0; i <_element_names.size(); ++i)
     { 

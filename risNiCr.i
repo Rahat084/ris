@@ -4,17 +4,19 @@ eps = 20.0 # Damage Efficiency
 Riv = 5E-2 # Recombination Rate
 Ni_conc = 0.82
 Cr_conc = 0.18
+Vac_conc = 1E-10
+Int_conc = 1E-15
 [Mesh]
   [rectangle]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 1000
     #ny = 80
-    #elem_type = Quad
-    xmax = 7E-3
+    #elem_type = EDGE3 #Quad
+    xmax = 7E-4
     xmin = 0
-    #ymax = 1E-6
-    #ymin = 0 
+    #bias_x = 0.6
+    #second_order = true
   []
 []
 
@@ -22,22 +24,22 @@ Cr_conc = 0.18
   [C_Vac]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.5
+    initial_condition = ${Vac_conc}
   []
   [C_Int]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.5
+    initial_condition = ${Int_conc}
   []
   [C_Ni]
     order = FIRST
     family = LAGRANGE
-    initial_condition = ${fparse Ni_conc}
+    initial_condition = ${Ni_conc}
   []
   [C_Cr]
     order = FIRST
     family = LAGRANGE
-    initial_condition = ${fparse Cr_conc}
+    initial_condition = ${Cr_conc}
   []
 []
 
@@ -83,13 +85,13 @@ Cr_conc = 0.18
   [Vac_recomb]
     type = ADRecombination
     variable = C_Vac
-    recombination_rate = ${fparse Riv}
+    recombination_rate = ${Riv}
     defect_conjugate = C_Int
   []
   [Int_recomb]
     type = ADRecombination
     variable = C_Int
-    recombination_rate = ${fparse Riv}
+    recombination_rate = ${Riv}
     defect_conjugate = C_Vac
   []
   [Vac_source]
@@ -125,8 +127,8 @@ Cr_conc = 0.18
   [radiation_fluxes]
     type = RISFluxes
     element_names = 'Ni Cr'
-    element_int_diffCoef = '2E-1 4.3E-1'
-    element_vac_diffCoef = '1.3E-1 1.75E-1'
+    element_int_diffCoef = '2E5 1.3E5'
+    element_vac_diffCoef = '1.3E5 4.75E5'
     vacancy_concentration = C_Vac
     interstitial_concentration = C_Int
     element_concentration = 'C_Ni C_Cr'
